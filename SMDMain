@@ -1,0 +1,108 @@
+from cmu_graphics import*
+from smdFunc import *
+from smdRender import *
+from smdPlay import *
+from smdHelp import *
+
+    
+################
+# Start Screen #
+################
+def smdSplash_onScreenActivate(app):
+    app.startupSound = loadSound('/Users/Natu/Downloads/Python/15-112/Seppuku/GAMEBOY ADVANCEADVANCE SPMICRO Startup Sound.mp3')# gotten from youtube https://www.youtube.com/watch?v=CoWTz0jEfAI
+    app.playing = True
+    app.flash = True
+    app.background = 'black'
+    app.sf = 100
+    app.points1= [[[-1],[-1],[1]],
+                [[1],[-1],[1]],
+                [[1],[1],[1]],
+                [[-1],[1],[1]],
+                [[-1],[-1],[-1]],
+                [[1],[-1],[-1]],
+                [[1],[1],[-1]],
+                [[-1],[1],[-1]],
+                [[1/3],[-1],[-1]],#side1 8-15
+                [[1/3],[-1],[1]],
+                [[1/3],[1],[1]],
+                [[1/3],[1],[-1]],
+                [[-1/3],[-1],[-1]],
+                [[-1/3],[-1],[1]],
+                [[-1/3],[1],[1]],
+                [[-1/3],[1],[-1]],
+                [[-1],[1/3],[-1]],#top 16-23
+                [[-1],[1/3],[1]],
+                [[1],[1/3],[1]],
+                [[1],[1/3],[-1]],
+                [[-1],[-1/3],[-1]],
+                [[-1],[-1/3],[1]],
+                [[1],[-1/3],[1]],
+                [[1],[-1/3],[-1]],
+                [[-1],[-1],[1/3]],#side2 24-31
+                [[-1],[1],[1/3]],
+                [[1],[1],[1/3]],
+                [[1],[-1],[1/3]],
+                [[-1],[-1],[-1/3]],
+                [[-1],[1],[-1/3]],
+                [[1],[1],[-1/3]],
+                [[1],[-1],[-1/3]]]
+    app.pointsRot1 = []
+    app.transform = [[1,0,0],[0,1,0],[0,0,0]]
+    app.angleX = 13
+    app.angleY = 45
+    app.angleZ = 0
+    app.rotateX =[]
+    app.rotateY=[]
+    app.rotateZ = []
+    app.grow = False
+    app.counter2=0
+def smdSplash_onStep(app):
+    app.counter2+=1
+    if app.counter2%12==0:
+        app.flash= not app.flash
+    if app.grow:
+        app.sf+=4
+    takeStep(app)
+
+def takeStep(app):
+    getNewRotationMatrixZ(app)
+    getNewRotationMatrixX(app)
+    getNewRotationMatrixY(app)
+    app.pointsRot1 = []
+    rotate(app, app.points1,app.sf,app.pointsRot1)
+    cx,cy = app.pointsRot1[0]
+    if cy<=-200:
+        setActiveScreen('smdPlay')
+
+def smdSplash_redrawAll(app):
+    if app.flash:
+        drawLabel('[Click Anywhere to Start]',500,700,size=56,fill='white', font = 'Eurostile Regular')
+    drawLabel('Welcome to 2.5ishD ',500,200,size=56,fill='white')
+    drawLabel('Rubix Cube', 500,600,size=56,fill='white')
+    i=0
+    pointsLocs1=[[n,n] for n in range(len(app.pointsRot1))]
+    for cx1,cy1 in app.pointsRot1:
+        pointsLocs1[i]=[cx1,cy1]
+        drawCircle(cx1 ,cy1, 5, fill='red')
+        i+=1
+    makeRubix(pointsLocs1)
+
+def smdSplash_onMousePress(app,mouseX, mouseY):
+    cx,cy = app.pointsRot1[0]
+    if cy>=0:
+        if app.playing:
+            app.startupSound.play()
+        app.grow=True
+    else:
+        app.startupSound.pause()
+        app.playing = False
+        setActiveScreen('smdPlay')
+
+##########
+## Main ##
+##########
+
+def main():
+    runAppWithScreens(initialScreen='smdSplash', width=1000,height=800)
+
+main()
